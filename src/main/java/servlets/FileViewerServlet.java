@@ -1,12 +1,13 @@
 package servlets;
 
 import simple_servlet_api.annotations.SimpleWebServlet;
-import utils.ServletUtils;
+import simple_servlet_api.exeptions.SimpleServletException;
+import simple_servlet_api.http.SimpleHttpServlet;
+import simple_servlet_api.http.SimpleHttpServletRequest;
+import simple_servlet_api.http.SimpleHttpServletResponse;
+import utils.ServerConfig;
+import utils.ServerUtils;
 
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
@@ -16,34 +17,32 @@ import java.util.HashMap;
 import java.util.Map;
 
 @SimpleWebServlet(name = "FileViewer", value = "/FileViewer")
-@WebServlet(name = "FileViewer", value = "/FileViewer")
-public class FileViewerServlet extends HttpServlet {
+public class FileViewerServlet extends SimpleHttpServlet {
     Map<String, byte[]> filesCache = new HashMap<>();
 
     private static String dirPath;
-    private static final String configFilePath = utils.ServletConfig.configPath;
+    private static final String configFilePath = ServerConfig.configPath;
 
 
     @Override
-    public void init(javax.servlet.ServletConfig config) throws ServletException {
-        super.init(config);
+    public void init() throws SimpleServletException {
         try {
-            dirPath = ServletUtils.getFileUrlFromConfig(configFilePath);
+            dirPath = ServerUtils.getFileUrlFromConfig(configFilePath);
         } catch (Exception e) {
-            throw new ServletException("Something went wrong with config file parsing.\n" +
+            throw new SimpleServletException("Something went wrong with config file parsing.\n" +
                     "Please, check config file at: " + configFilePath);
         }
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void doGet(SimpleHttpServletRequest request, SimpleHttpServletResponse response) throws IOException {
         String fileName = request.getParameter("file");
 
         OutputStream os = response.getOutputStream();
 
         byte[] content;
 
-        if (ServletUtils.getFileNamesFromBaseDir(dirPath).contains(fileName)) {
+        if (ServerUtils.getFileNamesFromBaseDir(dirPath).contains(fileName)) {
             if (filesCache.containsKey(fileName)) {
                 content = filesCache.get(fileName);
             } else {

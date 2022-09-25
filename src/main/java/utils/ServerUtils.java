@@ -9,8 +9,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class ServletUtils {
-    private ServletUtils() {
+public final class ServerUtils {
+    private ServerUtils() {
     }
 
     public static List<String> getFileNamesFromBaseDir(String dirPath) {

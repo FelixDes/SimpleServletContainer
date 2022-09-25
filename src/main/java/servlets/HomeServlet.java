@@ -1,37 +1,36 @@
 package servlets;
 
 import simple_servlet_api.annotations.SimpleWebServlet;
-import utils.ServletConfig;
-import utils.ServletUtils;
+import simple_servlet_api.exeptions.SimpleServletException;
+import simple_servlet_api.http.SimpleHttpServlet;
+import simple_servlet_api.http.SimpleHttpServletRequest;
+import simple_servlet_api.http.SimpleHttpServletResponse;
+import utils.ServerConfig;
+import utils.ServerUtils;
 
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
 @SimpleWebServlet(name = "FilesServlet", value = {"/", "/home"})
-@WebServlet(name = "FilesServlet", value = {"/", "/home"})
-public class HomeServlet extends HttpServlet {
+public class HomeServlet extends SimpleHttpServlet {
     private static String dirPath;
-    private static final String configFilePath = ServletConfig.configPath;
+    private static final String configFilePath = ServerConfig.configPath;
 
     @Override
-//    public void init(javax.servlet.ServletConfig config) throws ServletException {
-    public void init(javax.servlet.ServletConfig config) throws ServletException {
-        super.init(config);
+    public void init() throws SimpleServletException {
         try {
-            dirPath = ServletUtils.getFileUrlFromConfig(configFilePath);
+            dirPath = ServerUtils.getFileUrlFromConfig(configFilePath);
         } catch (Exception e) {
-            throw new ServletException("Something went wrong with config file parsing.\n" +
+            throw new SimpleServletException("Something went wrong with config file parsing.\n" +
                     "Please, check config file at: " + configFilePath);
         }
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void doGet(SimpleHttpServletRequest request, SimpleHttpServletResponse response) throws IOException {
         response.setContentType("text/html");
         PrintWriter printWriter = response.getWriter();
         printWriter.write(getHomePageHtml());
@@ -40,7 +39,7 @@ public class HomeServlet extends HttpServlet {
 
     private String getHomePageHtml() {
         StringBuilder filesHtml = new StringBuilder();
-        for (String file : ServletUtils.getFileNamesFromBaseDir(dirPath)) {
+        for (String file : ServerUtils.getFileNamesFromBaseDir(dirPath)) {
             filesHtml.append(String.format("<a href='FileViewer?file=%s'>%s</a><br>", file, file));
         }
         return "<html><head><title>Home page</title></head>" +

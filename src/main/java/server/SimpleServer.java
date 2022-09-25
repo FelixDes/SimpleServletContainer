@@ -3,9 +3,12 @@ package server;
 import org.json.JSONObject;
 import org.reflections.Reflections;
 import simple_servlet_api.annotations.SimpleWebServlet;
+import simple_servlet_api.exeptions.SimpleServletException;
 import simple_servlet_api.http.SimpleHttpServlet;
 
 import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,6 +26,8 @@ public class SimpleServer {
 
 
     public SimpleServer() throws Exception {
+        parsePortAndUrl();
+
         setServletClasses();
         setServletsAndMapping();
     }
@@ -57,21 +62,21 @@ public class SimpleServer {
     public void run() throws Exception {
         initServlets();
 
-//        parsePortAndUrl();
-//
-//        try (ServerSocket ss = new ServerSocket(port)) {
-//            while (true) {
-//                Socket socket = ss.accept();
-//                new Thread(new SocketThread(socket, url)).start();
-//            }
-//        } catch (Exception e) {
-//            throw new Exception("Something went wrong with ServerSocket initialization on port: " + port +
-//                    "\nPlease, check config file at: " + configFilePath);
-//        }
+        try (ServerSocket ss = new ServerSocket(port)) {
+            while (true) {
+                Socket socket = ss.accept();
+                new Thread(new SocketThread(socket, mapping)).start();
+            }
+        } catch (Exception e) {
+            throw new Exception("Something went wrong with ServerSocket initialization on port: " + port +
+                    "\nPlease, check config file at: " + configFilePath);
+        }
     }
 
-    private void initServlets() {
-        servlets.forEach(SimpleHttpServlet::init);
+    private void initServlets() throws SimpleServletException {
+        for (SimpleHttpServlet servlet : servlets) {
+            servlet.init();
+        }
     }
 
     public void parsePortAndUrl() throws Exception {
