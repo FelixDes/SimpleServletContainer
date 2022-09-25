@@ -70,6 +70,12 @@ public class SimpleHttpServletResponseProcessor implements SimpleHttpServletResp
         return contentPrintWriter;
     }
 
+    @Override
+    public void sendError(int status, String msg) {
+        setStatus(status);
+        getWriter().write(msg);
+    }
+
     public byte[] getBytes() {
         StringBuilder result = new StringBuilder();
 

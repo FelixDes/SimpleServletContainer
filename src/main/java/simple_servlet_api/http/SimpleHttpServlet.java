@@ -7,7 +7,17 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public abstract class SimpleHttpServlet {
-    public abstract void init() throws SimpleServletException;
+    public static final String METHOD_GET = "GET";
+    public static final String METHOD_POST = "POST";
 
-    public abstract void doGet(SimpleHttpServletRequest request, SimpleHttpServletResponse response) throws SimpleServletException, IOException;
+    public void init() throws SimpleServletException {
+    }
+
+    public void doGet(SimpleHttpServletRequest request, SimpleHttpServletResponse response) throws SimpleServletException, IOException {
+        response.sendError(SimpleHttpServletResponse.SC_METHOD_NOT_ALLOWED, "Not Supported");
+    }
+
+    public void doPost(SimpleHttpServletRequest request, SimpleHttpServletResponse response) throws SimpleServletException, IOException {
+        response.sendError(SimpleHttpServletResponse.SC_METHOD_NOT_ALLOWED, "Not Supported");
+    }
 }

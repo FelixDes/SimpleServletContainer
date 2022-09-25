@@ -4,6 +4,7 @@ package simple_servlet_api.http;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SimpleHttpServletRequestProcessor implements SimpleHttpServletRequest {
@@ -16,44 +17,7 @@ public class SimpleHttpServletRequestProcessor implements SimpleHttpServletReque
     public SimpleHttpServletRequestProcessor(BufferedReader request) throws IOException {
         parseFirstLine(request.readLine());
         parseHeaders(request);
-    }
-
-    private void parseHeaders(BufferedReader request) throws IOException {
-        String line;
-        while ((line = request.readLine()) != null) {
-            if (line.equals("")) {
-                break;
-            }
-            String name = line.split(": ")[0];
-            String value = line.split(": ")[1];
-            Stream<String> stringStream = (Arrays.stream(value.split(",")).map(String::trim));
-            headersMap.put(name, stringStream.toArray(String[]::new));
-        }
-    }
-
-    @Override
-    public String getMethod() {
-        return method;
-    }
-
-    @Override
-    public String getParameter(String parameter) {
-        return queryParameters.get(parameter);
-    }
-
-    @Override
-    public String getPath() {
-        return path;
-    }
-
-    @Override
-    public String getQueryString() {
-        return queryString;
-    }
-
-    @Override
-    public Map<String, String[]> getHeaders() {
-        return headersMap;
+        parseContent(request);
     }
 
     private void parseFirstLine(String firstLine) {
@@ -61,7 +25,7 @@ public class SimpleHttpServletRequestProcessor implements SimpleHttpServletReque
         int startOfQuery = firstLine.indexOf('?');
         int endOfQuery = firstLine.indexOf(' ', startOfPath);
 
-        method = firstLine.substring(0, startOfPath);
+        method = firstLine.substring(0, startOfPath - 1);
 
         String query = "";
 
@@ -88,4 +52,64 @@ public class SimpleHttpServletRequestProcessor implements SimpleHttpServletReque
         return queryParameters;
     }
 
+    private void parseHeaders(BufferedReader request) throws IOException {
+        String line;
+        while ((line = request.readLine()) != null) {
+            if (line.trim().isEmpty()) {
+                break;
+            }
+            String name = line.split(": ")[0];
+            String value = line.split(": ")[1];
+            Stream<String> stringStream = (Arrays.stream(value.split(",")).map(String::trim));
+            headersMap.put(name, stringStream.toArray(String[]::new));
+        }
+    }
+
+    private void parseContent(BufferedReader request) throws IOException {
+        for (String line : bufferedReaderToList(request)) {
+            queryParameters.putAll(parseQuery(line));
+        }
+
+    }
+
+    private List<String> bufferedReaderToList(BufferedReader request) throws IOException {
+        List<String> res = new ArrayList<>();
+        int c;
+        StringBuilder str = new StringBuilder();
+
+        while (request.ready()) {
+            c = request.read();
+            str.append((char)c);
+            if (c == 13 || c == 10 || !request.ready()) {
+                res.add(str.toString());
+                str = new StringBuilder();
+            }
+        }
+        return res;
+    }
+
+    @Override
+    public String getMethod() {
+        return method;
+    }
+
+    @Override
+    public String getParameter(String parameter) {
+        return queryParameters.get(parameter);
+    }
+
+    @Override
+    public String getPath() {
+        return path;
+    }
+
+    @Override
+    public String getQueryString() {
+        return queryString;
+    }
+
+    @Override
+    public Map<String, String[]> getHeaders() {
+        return headersMap;
+    }
 }

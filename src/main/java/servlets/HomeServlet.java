@@ -8,9 +8,6 @@ import simple_servlet_api.http.SimpleHttpServletResponse;
 import utils.ServerConfig;
 import utils.ServerUtils;
 
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -22,7 +19,7 @@ public class HomeServlet extends SimpleHttpServlet {
     @Override
     public void init() throws SimpleServletException {
         try {
-            dirPath = ServerUtils.getResourcesUrlFromConfig(configFilePath);
+            dirPath = ServerUtils.getUrlFromConfig(configFilePath);
         } catch (Exception e) {
             throw new SimpleServletException("Something went wrong with config file parsing.\n" +
                     "Please, check config file at: " + configFilePath);
@@ -43,6 +40,7 @@ public class HomeServlet extends SimpleHttpServlet {
             filesHtml.append(String.format("<a href='FileViewer?file=%s'>%s</a><br>", file, file));
         }
         return "<html><head><title>Home page</title></head>" +
-                "<body style=\"font-size: 30px\"><h1>Files available:</h1>" + filesHtml + "</body></html>";
+                "<body style=\"font-size: 30px\"><h1>Files available:</h1>" + filesHtml +
+                "</body></html>";
     }
 }

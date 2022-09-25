@@ -58,4 +58,6 @@ public interface SimpleHttpServletResponse {
     void setHeader(String name, String value) throws IOException;
 
     PrintWriter getWriter();
+
+    void sendError(int var1, String var2) throws IOException;
 }

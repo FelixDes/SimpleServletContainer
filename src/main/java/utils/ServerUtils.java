@@ -27,7 +27,7 @@ public final class ServerUtils {
         return files;
     }
 
-    public static String getResourcesUrlFromConfig(String configFilePath) throws Exception {
+    public static String getUrlFromConfig(String configFilePath) throws Exception {
         JSONObject jsonObject = new JSONObject(Files.readString(Path.of(configFilePath), StandardCharsets.US_ASCII));
         return jsonObject.getString("url");
     }

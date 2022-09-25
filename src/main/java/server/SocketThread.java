@@ -2,6 +2,7 @@ package server;
 
 import simple_servlet_api.http.SimpleHttpServlet;
 import simple_servlet_api.http.SimpleHttpServletRequestProcessor;
+import simple_servlet_api.http.SimpleHttpServletResponse;
 import simple_servlet_api.http.SimpleHttpServletResponseProcessor;
 
 import java.io.*;
@@ -12,7 +13,7 @@ import java.util.stream.Collectors;
 public class SocketThread implements Runnable {
     private final InputStream is;
     private final OutputStream os;
-    private Map<String, SimpleHttpServlet> servletsMapping;
+    private final Map<String, SimpleHttpServlet> servletsMapping;
 
     public SocketThread(Socket socket, Map<String, SimpleHttpServlet> servletsMapping) throws IOException {
         this.is = socket.getInputStream();
@@ -31,8 +32,16 @@ public class SocketThread implements Runnable {
             String mapping = request.getPath();
 
             if (servletsMapping.containsKey(mapping)) {
-                servletsMapping.get(mapping).doGet(request, response);
+                String method = request.getMethod();
+
+                switch (method) {
+                    case SimpleHttpServlet.METHOD_GET -> servletsMapping.get(mapping).doGet(request, response);
+                    case SimpleHttpServlet.METHOD_POST -> servletsMapping.get(mapping).doPost(request, response);
+                }
+            } else {
+                response.sendError(SimpleHttpServletResponse.SC_NOT_FOUND, "Not Found");
             }
+
             os.write(response.getBytes());
             os.flush();
             os.close();
@@ -42,44 +51,6 @@ public class SocketThread implements Runnable {
             t.printStackTrace();
         }
     }
-
-//    private List<String> getStringsFromRequest() {
-//        List<String> result = new ArrayList<>();
-//        try () {
-//            String line;
-//            while ((line = br.readLine()) != null) {
-//                result.add(line);
-//            }
-//            return result;
-//        } catch (RuntimeException | IOException e) {
-//            throw new RuntimeException("Something went wrong with socket input stream. Perhaps socket connection was lost");
-//        }
-//    }
-
-
-//    private void writeResponseForPath(String path) throws IOException {
-//        byte[] html;
-//        byte[] header;
-//
-//        if (Objects.equals(path, "")) {
-//            html = getHomePageHtmlBytes();
-//            header = getOkHeaderBytes(html);
-//        } else if (getFileNamesFromBaseDir().contains(path)) {
-//            File f = new File(fileUrl + path);
-//            html = Files.readAllBytes(f.toPath());
-//            header = getOkHeaderBytes(html);
-//        } else {
-//            html = getNotFoundPageHtmlBytes();
-//            header = getNotFoundHeaderBytes(html);
-//        }
-//        try {
-//            os.write(header);
-//            os.write(html);
-//            os.flush();
-//        } catch (IOException e) {
-//            throw new RuntimeException("Something went wrong with socket output stream. Perhaps socket connection was lost");
-//        }
-//    }
 
 //    private byte[] getHomePageHtmlBytes() {
 //        StringBuilder filesHtml = new StringBuilder();
