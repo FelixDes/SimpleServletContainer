@@ -8,7 +8,6 @@ import simple_servlet_api.http.SimpleHttpServletResponse;
 import utils.ServerConfig;
 import utils.ServerUtils;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -52,7 +51,7 @@ public class FileViewerServlet extends SimpleHttpServlet {
                 filesCache.put(fileName, content);
             }
         } else {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setStatus(SimpleHttpServletResponse.SC_NOT_FOUND);
             content = getNotFoundPageHtmlBytes();
         }
 

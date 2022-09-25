@@ -6,8 +6,8 @@ import simple_servlet_api.http.SimpleHttpServletResponseProcessor;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class SocketThread implements Runnable {
     private final InputStream is;
@@ -23,61 +23,39 @@ public class SocketThread implements Runnable {
     @Override
     public void run() {
         try {
-            String mapping = "/";
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            var request = new SimpleHttpServletRequestProcessor(br);
 
             var response = new SimpleHttpServletResponseProcessor();
+
+            String mapping = request.getPath();
+
             if (servletsMapping.containsKey(mapping)) {
-                servletsMapping.get(mapping).doGet(new SimpleHttpServletRequestProcessor(), response);
+                servletsMapping.get(mapping).doGet(request, response);
             }
             os.write(response.getBytes());
             os.flush();
             os.close();
+
+            br.close();
         } catch (Throwable t) {
             t.printStackTrace();
         }
     }
 
-    private String getPathFromRequest() {
-        try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            String request = br.readLine();
+//    private List<String> getStringsFromRequest() {
+//        List<String> result = new ArrayList<>();
+//        try () {
+//            String line;
+//            while ((line = br.readLine()) != null) {
+//                result.add(line);
+//            }
+//            return result;
+//        } catch (RuntimeException | IOException e) {
+//            throw new RuntimeException("Something went wrong with socket input stream. Perhaps socket connection was lost");
+//        }
+//    }
 
-            System.out.println("inp: " + request);
-
-            int startOfPath = request.indexOf(' ');
-            int startOfQuery = request.indexOf('?');
-            int endOfQuery = request.indexOf(' ', startOfPath + 1);
-
-            String reqType = request.substring(0, startOfPath),
-                    path = "", query = "";
-
-            if (startOfQuery != -1) {
-                path = request.substring(startOfPath, startOfQuery);
-                query = request.substring(startOfQuery, endOfQuery);
-            } else {
-                path = request.substring(startOfPath, endOfQuery);
-            }
-
-            Map<String, String> queryParameters = parseQuery(query);
-
-            System.out.println(reqType + "\t" + path + '\t' + queryParameters);
-            return "  ";
-
-        } catch (RuntimeException | IOException e) {
-            throw new RuntimeException("Something went wrong with socket input stream. Perhaps socket connection was lost");
-        }
-    }
-
-    private Map<String, String> parseQuery(String query) {
-        Map<String, String> queryParameters = new HashMap<>();
-        for (String queryParameter : query.split("&")) {
-            if (queryParameter.contains("=")) {
-                String name = queryParameter.split("=")[0], val = queryParameter.split("=")[1];
-                queryParameters.put(name, val);
-            }
-        }
-        return queryParameters;
-    }
 
 //    private void writeResponseForPath(String path) throws IOException {
 //        byte[] html;

@@ -8,8 +8,8 @@ import java.util.*;
 public class SimpleHttpServletResponseProcessor implements SimpleHttpServletResponse {
     private final ByteArrayOutputStream contentOutputStream;
     private final PrintWriter contentPrintWriter;
-    private final Map<String, String> headersMap = new HashMap<>();
-    private int status = STATUS_OK;
+    private final Map<String, String[]> headersMap = new HashMap<>();
+    private int status = SC_OK;
 
     private enum commonHeaders {
         CONNECTION("Connection"),
@@ -31,7 +31,7 @@ public class SimpleHttpServletResponseProcessor implements SimpleHttpServletResp
     }
 
     private void setDefaultHeaderValues() {
-        headersMap.put(commonHeaders.CONNECTION.name, "close");
+        headersMap.put(commonHeaders.CONNECTION.name, new String[]{"close"});
     }
 
     private String prepareStatus() {
@@ -62,7 +62,7 @@ public class SimpleHttpServletResponseProcessor implements SimpleHttpServletResp
 
     @Override
     public void setHeader(String name, String value) {
-        headersMap.put(name, value);
+        headersMap.put(name, value.split(","));
     }
 
     @Override
@@ -85,8 +85,8 @@ public class SimpleHttpServletResponseProcessor implements SimpleHttpServletResp
             setContentLength(contentBytes.length);
         }
 
-        for (Map.Entry<String, String> item : headersMap.entrySet()) {
-            result.append(item.getKey()).append(": ").append(item.getValue()).append("\r\n");
+        for (Map.Entry<String, String[]> item : headersMap.entrySet()) {
+            result.append(item.getKey()).append(": ").append(String.join(",", item.getValue())).append("\r\n");
         }
 
         result.append("\r\n");
