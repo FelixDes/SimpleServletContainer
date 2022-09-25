@@ -5,6 +5,7 @@ import org.reflections.Reflections;
 import simple_servlet_api.annotations.SimpleWebServlet;
 import simple_servlet_api.exeptions.SimpleServletException;
 import simple_servlet_api.http.SimpleHttpServlet;
+import utils.ServerConfig;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -17,8 +18,8 @@ import java.util.*;
 public class SimpleServer {
     private static int port;
     private static String url;
-    private static String SERVLETS_PACKAGE_NAME = "servlets";
-    private static final String configFilePath = "/home/felix/_Programming/Idea_Projects/OOP/OOP_1/config/config.json";
+    private static String servlets_package;
+    private static final String configFilePath = ServerConfig.configPath;
 
     private List<Class<?>> servletClasses;
     private List<SimpleHttpServlet> servlets;
@@ -26,19 +27,19 @@ public class SimpleServer {
 
 
     public SimpleServer() throws Exception {
-        parsePortAndUrl();
+        parseConfig();
 
         setServletClasses();
-        setServletsAndMapping();
+        setServletsMapping();
     }
 
     private void setServletClasses() {
-        Reflections reflections = new Reflections(SERVLETS_PACKAGE_NAME);
+        Reflections reflections = new Reflections(servlets_package);
         Set<Class<?>> set = reflections.getTypesAnnotatedWith(SimpleWebServlet.class);
         servletClasses = set.stream().toList();
     }
 
-    private void setServletsAndMapping() throws Exception {
+    private void setServletsMapping() throws Exception {
         mapping = new HashMap<>();
         servlets = new ArrayList<>();
 
@@ -79,11 +80,12 @@ public class SimpleServer {
         }
     }
 
-    public void parsePortAndUrl() throws Exception {
+    public void parseConfig() throws Exception {
         try {
             JSONObject jsonObject = new JSONObject(Files.readString(Path.of(configFilePath), StandardCharsets.US_ASCII));
             port = jsonObject.getInt("port");
             url = jsonObject.getString("url");
+            servlets_package = jsonObject.getString("servlets_package");
         } catch (IOException e) {
             throw new Exception("Something went wrong with config file parsing. \nPlease, check config file at: " + configFilePath);
         }

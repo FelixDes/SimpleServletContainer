@@ -26,7 +26,7 @@ public class FileViewerServlet extends SimpleHttpServlet {
     @Override
     public void init() throws SimpleServletException {
         try {
-            dirPath = ServerUtils.getFileUrlFromConfig(configFilePath);
+            dirPath = ServerUtils.getResourcesUrlFromConfig(configFilePath);
         } catch (Exception e) {
             throw new SimpleServletException("Something went wrong with config file parsing.\n" +
                     "Please, check config file at: " + configFilePath);
