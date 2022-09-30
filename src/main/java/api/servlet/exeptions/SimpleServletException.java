@@ -1,4 +1,4 @@
-package simple_servlet_api.exeptions;
+package api.servlet.exeptions;
 
 public class SimpleServletException extends Exception {
     private Throwable rootCause;

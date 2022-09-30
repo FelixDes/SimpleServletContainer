@@ -1,8 +1,8 @@
-package simple_servlet_api.http;
+package api.servlet.http;
 
 import java.util.Map;
 
-public interface SimpleHttpServletRequest {
+public interface HttpServletRequest {
     String getMethod();
 
     String getParameter(String file);

@@ -1,4 +1,4 @@
-package simple_servlet_api.annotations;
+package api.servlet.annotations;
 
 import javax.servlet.annotation.WebInitParam;
 import java.lang.annotation.Retention;

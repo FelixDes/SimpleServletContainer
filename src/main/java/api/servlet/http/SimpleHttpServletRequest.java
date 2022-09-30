@@ -1,20 +1,19 @@
-package simple_servlet_api.http;
+package api.servlet.http;
 
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class SimpleHttpServletRequestProcessor implements SimpleHttpServletRequest {
+public class SimpleHttpServletRequest implements HttpServletRequest {
     private String method;
     private String path;
     private String queryString;
     private Map<String, String> queryParameters;
     private final Map<String, String[]> headersMap = new HashMap<>();
 
-    public SimpleHttpServletRequestProcessor(BufferedReader request) throws IOException {
+    public SimpleHttpServletRequest(BufferedReader request) throws IOException {
         parseFirstLine(request.readLine());
         parseHeaders(request);
         parseContent(request);
@@ -78,12 +77,13 @@ public class SimpleHttpServletRequestProcessor implements SimpleHttpServletReque
 
         while (request.ready()) {
             c = request.read();
-            str.append((char)c);
+            str.append((char) c);
             if (c == 13 || c == 10 || !request.ready()) {
                 res.add(str.toString());
                 str = new StringBuilder();
             }
         }
+
         return res;
     }
 

@@ -1,10 +1,10 @@
 package servlets;
 
-import simple_servlet_api.annotations.SimpleWebServlet;
-import simple_servlet_api.exeptions.SimpleServletException;
-import simple_servlet_api.http.SimpleHttpServlet;
-import simple_servlet_api.http.SimpleHttpServletRequest;
-import simple_servlet_api.http.SimpleHttpServletResponse;
+import api.servlet.annotations.SimpleWebServlet;
+import api.servlet.exeptions.SimpleServletException;
+import api.servlet.http.SimpleHttpServlet;
+import api.servlet.http.HttpServletRequest;
+import api.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -13,21 +13,23 @@ import java.io.PrintWriter;
 public class PostServlet extends SimpleHttpServlet {
 
     @Override
-    public void doGet(SimpleHttpServletRequest request, SimpleHttpServletResponse response) throws IOException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("text/html");
-        PrintWriter printWriter = response.getWriter();
-        printWriter.write(getPostPageHtml());
-        printWriter.close();
+
+        try (PrintWriter printWriter = response.getWriter()) {
+            printWriter.write(getPostPageHtml());
+        }
     }
 
     @Override
-    public void doPost(SimpleHttpServletRequest request, SimpleHttpServletResponse response) throws SimpleServletException, IOException {
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws SimpleServletException, IOException {
         response.setContentType("text/text");
-        PrintWriter printWriter = response.getWriter();
-        printWriter.write(request.getParameter("username"));
-        printWriter.write('\n');
-        printWriter.write(request.getParameter("password"));
-        printWriter.close();
+
+        try (PrintWriter printWriter = response.getWriter();) {
+            printWriter.write(request.getParameter("username"));
+            printWriter.write('\n');
+            printWriter.write(request.getParameter("password"));
+        }
     }
 
     private String getPostPageHtml() {

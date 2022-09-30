@@ -1,11 +1,11 @@
 package servlets;
 
-import simple_servlet_api.annotations.SimpleWebServlet;
-import simple_servlet_api.exeptions.SimpleServletException;
-import simple_servlet_api.http.SimpleHttpServlet;
-import simple_servlet_api.http.SimpleHttpServletRequest;
-import simple_servlet_api.http.SimpleHttpServletResponse;
-import utils.ServerConfig;
+import api.servlet.annotations.SimpleWebServlet;
+import api.servlet.exeptions.SimpleServletException;
+import api.servlet.http.SimpleHttpServlet;
+import api.servlet.http.HttpServletRequest;
+import api.servlet.http.HttpServletResponse;
+import utils.ServerConfigPath;
 import utils.ServerUtils;
 
 import java.io.File;
@@ -20,7 +20,7 @@ public class FileViewerServlet extends SimpleHttpServlet {
     Map<String, byte[]> filesCache = new HashMap<>();
 
     private static String dirPath;
-    private static final String configFilePath = ServerConfig.configPath;
+    private static final String configFilePath = ServerConfigPath.CONFIG_PATH;
 
 
     @Override
@@ -34,30 +34,29 @@ public class FileViewerServlet extends SimpleHttpServlet {
     }
 
     @Override
-    public void doGet(SimpleHttpServletRequest request, SimpleHttpServletResponse response) throws IOException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String fileName = request.getParameter("file");
 
-        OutputStream os = response.getOutputStream();
+        try (OutputStream os = response.getOutputStream()) {
+            byte[] content;
 
-        byte[] content;
+            if (ServerUtils.getFileNamesFromBaseDir(dirPath).contains(fileName)) {
+                if (filesCache.containsKey(fileName)) {
+                    content = filesCache.get(fileName);
+                } else {
+                    File f = new File(dirPath + fileName);
+                    content = Files.readAllBytes(f.toPath());
 
-        if (ServerUtils.getFileNamesFromBaseDir(dirPath).contains(fileName)) {
-            if (filesCache.containsKey(fileName)) {
-                content = filesCache.get(fileName);
+                    filesCache.put(fileName, content);
+                }
             } else {
-                File f = new File(dirPath + fileName);
-                content = Files.readAllBytes(f.toPath());
-
-                filesCache.put(fileName, content);
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                content = getNotFoundPageHtmlBytes();
             }
-        } else {
-            response.setStatus(SimpleHttpServletResponse.SC_NOT_FOUND);
-            content = getNotFoundPageHtmlBytes();
-        }
 
-        os.write(content);
-        os.flush();
-        os.close();
+            os.write(content);
+            os.flush();
+        }
     }
 
     private byte[] getNotFoundPageHtmlBytes() {

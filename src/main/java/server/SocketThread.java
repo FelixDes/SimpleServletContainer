@@ -1,14 +1,13 @@
 package server;
 
-import simple_servlet_api.http.SimpleHttpServlet;
-import simple_servlet_api.http.SimpleHttpServletRequestProcessor;
-import simple_servlet_api.http.SimpleHttpServletResponse;
-import simple_servlet_api.http.SimpleHttpServletResponseProcessor;
+import api.servlet.http.SimpleHttpServlet;
+import api.servlet.http.SimpleHttpServletRequest;
+import api.servlet.http.HttpServletResponse;
+import api.servlet.http.SimpleHttpServletResponse;
 
 import java.io.*;
 import java.net.Socket;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class SocketThread implements Runnable {
     private final InputStream is;
@@ -23,11 +22,11 @@ public class SocketThread implements Runnable {
 
     @Override
     public void run() {
-        try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            var request = new SimpleHttpServletRequestProcessor(br);
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(is)); is; os) {
 
-            var response = new SimpleHttpServletResponseProcessor();
+            var request = new SimpleHttpServletRequest(br);
+
+            var response = new SimpleHttpServletResponse();
 
             String mapping = request.getPath();
 
@@ -39,14 +38,12 @@ public class SocketThread implements Runnable {
                     case SimpleHttpServlet.METHOD_POST -> servletsMapping.get(mapping).doPost(request, response);
                 }
             } else {
-                response.sendError(SimpleHttpServletResponse.SC_NOT_FOUND, "Not Found");
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "Not Found");
             }
 
             os.write(response.getBytes());
-            os.flush();
-            os.close();
 
-            br.close();
+            os.flush();
         } catch (Throwable t) {
             t.printStackTrace();
         }

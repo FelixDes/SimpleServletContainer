@@ -1,14 +1,14 @@
-package simple_servlet_api.http;
+package api.servlet.http;
 
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.*;
 import java.util.*;
 
-public class SimpleHttpServletResponseProcessor implements SimpleHttpServletResponse {
+public class SimpleHttpServletResponse implements HttpServletResponse {
     private final ByteArrayOutputStream contentOutputStream;
     private final PrintWriter contentPrintWriter;
-    private final Map<String, String[]> headersMap = new HashMap<>();
+    private final Map<String, String[]> headersMap;
     private int status = SC_OK;
 
     private enum commonHeaders {
@@ -23,15 +23,17 @@ public class SimpleHttpServletResponseProcessor implements SimpleHttpServletResp
         }
     }
 
-    public SimpleHttpServletResponseProcessor() {
+    public SimpleHttpServletResponse() {
         this.contentOutputStream = new ByteArrayOutputStream();
         this.contentPrintWriter = new PrintWriter(contentOutputStream);
 
-        setDefaultHeaderValues();
+        headersMap = setDefaultHeaderValues();
     }
 
-    private void setDefaultHeaderValues() {
+    private Map<String, String[]> setDefaultHeaderValues() {
+        Map<String, String[]> headersMap = new HashMap<>();
         headersMap.put(commonHeaders.CONNECTION.name, new String[]{"close"});
+        return headersMap;
     }
 
     private String prepareStatus() {
@@ -81,8 +83,8 @@ public class SimpleHttpServletResponseProcessor implements SimpleHttpServletResp
 
         result.append(prepareStatus()).append("\r\n");
 
-
         contentPrintWriter.flush();
+        contentPrintWriter.close();
 
         byte[] contentBytes = contentOutputStream.toByteArray();
 

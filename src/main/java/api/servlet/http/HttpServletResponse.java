@@ -1,10 +1,10 @@
-package simple_servlet_api.http;
+package api.servlet.http;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 
-public interface SimpleHttpServletResponse {
+public interface HttpServletResponse {
     int SC_CONTINUE = 100;
     int SC_SWITCHING_PROTOCOLS = 101;
     int SC_OK = 200;
