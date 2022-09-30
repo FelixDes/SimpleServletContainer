@@ -51,46 +51,4 @@ public class SocketThread implements Runnable {
             t.printStackTrace();
         }
     }
-
-//    private byte[] getHomePageHtmlBytes() {
-//        StringBuilder filesHtml = new StringBuilder();
-//        for (String file : getFileNamesFromBaseDir()) {
-//            filesHtml.append(String.format("<a href=\"%s\">%s</a><br>", file, file));
-//        }
-//        String html = "<html><head><title>Home page</title></head><body style=\"font-size: 30px\"><h1>Files available:</h1>" + filesHtml + "</body></html>";
-//        return html.getBytes();
-//    }
-//
-//    private byte[] getNotFoundPageHtmlBytes() {
-//        String html = "<html><body style=\"background-color: #000; color: #fff; font-size: 30px\">404 File Not Found</body></html>";
-//        return html.getBytes();
-//    }
-//
-//    private byte[] getOkHeaderBytes(byte[] content) {
-//        String header = "HTTP 200 OK\r\n" +
-//                "Content-Length: " + content.length + "\r\n" +
-//                "Connection: close\r\n\r\n";
-//        return header.getBytes();
-//    }
-//
-//    private byte[] getNotFoundHeaderBytes(byte[] content) {
-//        String header = "HTTP 404 Not Found\r\n" +
-//                "Content-Length: " + content.length + "\r\n" +
-//                "Connection: close\r\n\r\n";
-//        return header.getBytes();
-//    }
-//
-//    private List<String> getFileNamesFromBaseDir() {
-//        List<String> files = new ArrayList<>();
-//        File[] listOfFiles = new File(fileUrl).listFiles();
-//
-//        if (listOfFiles != null) {
-//            for (File listOfFile : listOfFiles) {
-//                if (listOfFile.isFile()) {
-//                    files.add(listOfFile.getName());
-//                }
-//            }
-//        }
-//        return files;
-//    }
 }

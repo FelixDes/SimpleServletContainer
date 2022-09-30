@@ -69,7 +69,6 @@ public class SimpleHttpServletRequestProcessor implements SimpleHttpServletReque
         for (String line : bufferedReaderToList(request)) {
             queryParameters.putAll(parseQuery(line));
         }
-
     }
 
     private List<String> bufferedReaderToList(BufferedReader request) throws IOException {
