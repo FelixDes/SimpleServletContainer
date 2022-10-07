@@ -1,41 +1,75 @@
 package server;
 
-import org.json.JSONObject;
-import org.reflections.Reflections;
-import api.servlet.annotations.SimpleWebServlet;
-import api.servlet.exeptions.SimpleServletException;
-import api.servlet.http.SimpleHttpServlet;
-import utils.ServerConfigPath;
+import servlet.annotations.SimpleWebServlet;
+import servlet.exeptions.SimpleServletException;
+import servlet.http.SimpleHttpServlet;
 import utils.ServerUtils;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 public class SimpleServer {
-    private static final String configFilePath = ServerConfigPath.CONFIG_PATH;
-    private static final int port = ServerUtils.getPortFromConfig(configFilePath);
-    private static String servletsPackage = "servlets";
-
+    private final String configFilePath;
+    private final int port;
     private final List<Class<?>> servletClasses;
     private final List<SimpleHttpServlet> servlets;
     private final Map<String, SimpleHttpServlet> mapping;
 
 
-    public SimpleServer() throws Exception {
-        servletClasses = readServletClasses();
+    private final String servletsApiPath;
+
+
+    public SimpleServer(String configFilePath, String servletsJarPath, String servletsApiPath) throws Exception {
+        this.servletsApiPath = servletsApiPath;
+
+        this.configFilePath = configFilePath;
+        port = ServerUtils.getPortFromConfig(configFilePath);
+
+        var classesFromJar = readClassesFromJar(servletsJarPath);
+
+        servletClasses = readServletFromClasses(classesFromJar);
         servlets = readServlets();
         mapping = readMapping();
     }
 
-    private List<Class<?>> readServletClasses() {
-        Reflections reflections = new Reflections(servletsPackage);
-        Set<Class<?>> set = reflections.getTypesAnnotatedWith(SimpleWebServlet.class);
-        return set.stream().toList();
+    private List<Class<?>> readClassesFromJar(String servletsJarPath) throws IOException, ClassNotFoundException {
+        List<Class<?>> classesFromJar = new ArrayList<>();
+
+        JarFile jarFile = new JarFile(servletsJarPath);
+
+        Enumeration<JarEntry> jarEntries = jarFile.entries();
+
+        URLClassLoader cl = URLClassLoader.newInstance(new URL[]{new URL("jar:file:" + servletsJarPath + "!/"), new URL("jar:file:" + servletsApiPath + "!/")});
+
+        while (jarEntries.hasMoreElements()) {
+            JarEntry jarEntry = jarEntries.nextElement();
+
+            if (jarEntry.isDirectory() || !jarEntry.getName().endsWith(".class")) {
+                continue;
+            }
+
+            String className = jarEntry.getName().substring(0, jarEntry.getName().length() - 6).replace('/', '.');
+            classesFromJar.add(cl.loadClass(className));
+        }
+        return classesFromJar;
+    }
+
+    private List<Class<?>> readServletFromClasses(List<Class<?>> classesFromJar) {
+        List<Class<?>> servlets = new ArrayList<>();
+
+        for (Class<?> aClass : classesFromJar) {
+            if (Arrays.stream(aClass.getAnnotations()).anyMatch(elem -> elem.annotationType().equals(SimpleWebServlet.class)) &&
+                    aClass.getSuperclass().equals(SimpleHttpServlet.class)) {
+                servlets.add(aClass);
+            }
+        }
+        return servlets;
     }
 
     private List<SimpleHttpServlet> readServlets() throws Exception {
