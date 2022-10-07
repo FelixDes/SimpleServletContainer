@@ -3,6 +3,7 @@ package server;
 import org.apache.commons.cli.*;
 
 public class Main {
+//        java -jar server.jar -c "/home/felix/_Programming/Idea_Projects/OOP/OOP2/src/main/resources/config/sever_config.json" -s "/home/felix/Рабочий стол/Servlets-1.0-SNAPSHOT.jar" -api "/home/felix/_Programming/Idea_Projects/OOP/OOP2/jars/javax.servlet-api-1.0.jar"                                   ✔
 
     public static void main(String[] args) throws Exception {
         Options options = new Options();
@@ -33,7 +34,7 @@ public class Main {
         String configPath = cmd.getOptionValue("c");
         String servletsPath = cmd.getOptionValue("s");
         String servletsApiPath = cmd.getOptionValue("api");
-// -c "/home/felix/_Programming/Idea_Projects/OOP/OOP2/src/main/resources/config/sever_config.json" -s "/home/felix/Рабочий стол/Servlets-1.0-SNAPSHOT.jar" -api "/home/felix/_Programming/Idea_Projects/OOP/OOP2/jars/javax.servlet-api-1.0.jar"
+
         SimpleServer ss = new SimpleServer(configPath, servletsPath, servletsApiPath);
         ss.run();
     }
