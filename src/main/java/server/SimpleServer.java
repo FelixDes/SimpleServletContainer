@@ -38,24 +38,29 @@ public class SimpleServer {
         mapping = readMapping();
     }
 
-    private List<Class<?>> readClassesFromJar(String servletsJarPath) throws IOException, ClassNotFoundException {
+    private List<Class<?>> readClassesFromJar(String servletsJarPath) throws ClassNotFoundException {
         List<Class<?>> classesFromJar = new ArrayList<>();
 
-        JarFile jarFile = new JarFile(servletsJarPath);
+        try (JarFile jarFile = new JarFile(servletsJarPath)) {
 
-        Enumeration<JarEntry> jarEntries = jarFile.entries();
+            Enumeration<JarEntry> jarEntries = jarFile.entries();
 
-        URLClassLoader cl = URLClassLoader.newInstance(new URL[]{new URL("jar:file:" + servletsJarPath + "!/"), new URL("jar:file:" + servletsApiPath + "!/")});
+            URLClassLoader cl = URLClassLoader.newInstance(new URL[]{new URL("jar:file:" + servletsJarPath + "!/"), new URL("jar:file:" + servletsApiPath + "!/")});
 
-        while (jarEntries.hasMoreElements()) {
-            JarEntry jarEntry = jarEntries.nextElement();
+            while (jarEntries.hasMoreElements()) {
+                JarEntry jarEntry = jarEntries.nextElement();
 
-            if (jarEntry.isDirectory() || !jarEntry.getName().endsWith(".class")) {
-                continue;
+                if (jarEntry.isDirectory() || !jarEntry.getName().endsWith(".class")) {
+                    continue;
+                }
+
+                String className = jarEntry.getName().substring(0, jarEntry.getName().length() - 6).replace('/', '.');
+                classesFromJar.add(cl.loadClass(className));
             }
 
-            String className = jarEntry.getName().substring(0, jarEntry.getName().length() - 6).replace('/', '.');
-            classesFromJar.add(cl.loadClass(className));
+            cl.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
         return classesFromJar;
     }
@@ -64,8 +69,7 @@ public class SimpleServer {
         List<Class<?>> servlets = new ArrayList<>();
 
         for (Class<?> aClass : classesFromJar) {
-            if (Arrays.stream(aClass.getAnnotations()).anyMatch(elem -> elem.annotationType().equals(SimpleWebServlet.class)) &&
-                    aClass.getSuperclass().equals(SimpleHttpServlet.class)) {
+            if (Arrays.stream(aClass.getAnnotations()).anyMatch(elem -> elem.annotationType().equals(SimpleWebServlet.class)) && aClass.getSuperclass().equals(SimpleHttpServlet.class)) {
                 servlets.add(aClass);
             }
         }
