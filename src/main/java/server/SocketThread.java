@@ -1,9 +1,9 @@
 package server;
 
-import api.servlet.http.SimpleHttpServlet;
-import api.servlet.http.SimpleHttpServletRequest;
-import api.servlet.http.HttpServletResponse;
-import api.servlet.http.SimpleHttpServletResponse;
+import servlet.http.SimpleHttpServlet;
+import servlet.http.SimpleHttpServletRequest;
+import servlet.http.HttpServletResponse;
+import servlet.http.SimpleHttpServletResponse;
 
 import java.io.*;
 import java.net.Socket;

@@ -1,5 +1,3 @@
 {
-  "port": 8081,
-  "servlets_package": "servlets",
   "url": "/home/felix/_Programming/Idea_Projects/OOP/OOP2/src/main/resources/server_resources/"
 }

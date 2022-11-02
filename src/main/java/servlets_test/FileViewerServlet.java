@@ -1,11 +1,11 @@
-package servlets;
+package servlets_test;
 
 import api.servlet.annotations.SimpleWebServlet;
 import api.servlet.exeptions.SimpleServletException;
 import api.servlet.http.SimpleHttpServlet;
 import api.servlet.http.HttpServletRequest;
 import api.servlet.http.HttpServletResponse;
-import utils.ServerConfigPath;
+import utils.ServletConfigPath;
 import utils.ServerUtils;
 
 import java.io.File;
@@ -20,7 +20,7 @@ public class FileViewerServlet extends SimpleHttpServlet {
     Map<String, byte[]> filesCache = new HashMap<>();
 
     private static String dirPath;
-    private static final String configFilePath = ServerConfigPath.CONFIG_PATH;
+    private static final String configFilePath = ServletConfigPath.CONFIG_PATH;
 
 
     @Override

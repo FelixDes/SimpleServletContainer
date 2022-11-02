@@ -1,4 +1,4 @@
-package servlets;
+package servlets_test;
 
 import api.servlet.annotations.SimpleWebServlet;
 import api.servlet.exeptions.SimpleServletException;
