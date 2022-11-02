@@ -22,30 +22,27 @@ public class SimpleServer {
     private final Map<String, SimpleHttpServlet> mapping;
 
 
-    private final String servletsApiPath;
-
-
     public SimpleServer(String configFilePath, String servletsJarPath, String servletsApiPath) throws Exception {
-        this.servletsApiPath = servletsApiPath;
-
         this.configFilePath = configFilePath;
         port = ServerUtils.getPortFromConfig(configFilePath);
 
-        var classesFromJar = readClassesFromJar(servletsJarPath);
+        var classesFromJar = readClassesFromJar(servletsJarPath, servletsApiPath);
 
         servletClasses = readServletFromClasses(classesFromJar);
         servlets = readServlets();
         mapping = readMapping();
     }
 
-    private List<Class<?>> readClassesFromJar(String servletsJarPath) throws ClassNotFoundException {
+    private List<Class<?>> readClassesFromJar(String servletsJarPath, String servletsApiPath) throws ClassNotFoundException {
         List<Class<?>> classesFromJar = new ArrayList<>();
 
         try (JarFile jarFile = new JarFile(servletsJarPath)) {
-
             Enumeration<JarEntry> jarEntries = jarFile.entries();
 
-            URLClassLoader cl = URLClassLoader.newInstance(new URL[]{new URL("jar:file:" + servletsJarPath + "!/"), new URL("jar:file:" + servletsApiPath + "!/")});
+            var servletsJar = new URL("jar:file:" + servletsJarPath + "!/");
+            var apiJar = new URL("jar:file:" + servletsApiPath + "!/");
+
+            URLClassLoader cl = URLClassLoader.newInstance(new URL[]{servletsJar, apiJar});
 
             while (jarEntries.hasMoreElements()) {
                 JarEntry jarEntry = jarEntries.nextElement();
@@ -69,7 +66,8 @@ public class SimpleServer {
         List<Class<?>> servlets = new ArrayList<>();
 
         for (Class<?> aClass : classesFromJar) {
-            if (Arrays.stream(aClass.getAnnotations()).anyMatch(elem -> elem.annotationType().equals(SimpleWebServlet.class)) && aClass.getSuperclass().equals(SimpleHttpServlet.class)) {
+            if (Arrays.stream(aClass.getAnnotations()).anyMatch(elem -> elem.annotationType().equals(SimpleWebServlet.class))
+                    && aClass.getSuperclass().equals(SimpleHttpServlet.class)) {
                 servlets.add(aClass);
             }
         }

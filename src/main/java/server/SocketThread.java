@@ -23,9 +23,7 @@ public class SocketThread implements Runnable {
     @Override
     public void run() {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(is)); is; os) {
-
             var request = new SimpleHttpServletRequest(br);
-
             var response = new SimpleHttpServletResponse();
 
             String mapping = request.getPath();
